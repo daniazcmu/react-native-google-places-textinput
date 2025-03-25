@@ -20,7 +20,6 @@ const styles = StyleSheet.create({
   container: {
     marginHorizontal: 16,
     marginTop: 10,
-    width: 250, // Default width
   },
   input: {
     height: 50,
