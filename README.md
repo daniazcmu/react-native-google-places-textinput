@@ -13,6 +13,9 @@ A customizable React Native TextInput component for Google Places Autocomplete u
 - 🔍 Custom place types filtering
 - 🌐 Multi-language support
 
+## Screenshot
+<img src="https://github.com/user-attachments/assets/1eb0c4da-4a2e-453e-a6b4-d63bf7fa4d20" width="320"/>
+
 ## Installation
 
 ```bash
