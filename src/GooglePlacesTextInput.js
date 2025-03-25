@@ -62,6 +62,12 @@ const styles = StyleSheet.create({
     marginTop: 2,
     textAlign: 'left',
   },
+  leftAligned: {
+    left: 15,
+  },
+  rightAligned: {
+    right: 15,
+  },
 });
 
 const GooglePlacesTextInput = forwardRef(
@@ -224,7 +230,7 @@ const GooglePlacesTextInput = forwardRef(
           {secondaryText && (
             <Text
               style={[
-                styles.secondaryText, // Changed from dynamicStyles to styles
+                styles.secondaryText,
                 style.suggestionText?.secondary,
                 isRTL && styles.rtlText,
               ]}
@@ -240,12 +246,7 @@ const GooglePlacesTextInput = forwardRef(
       if (!showSuggestions || predictions.length === 0) return null;
 
       return (
-        <View
-          style={[
-            styles.suggestionsContainer, // Changed from dynamicStyles to styles
-            style.suggestionsContainer,
-          ]}
-        >
+        <View style={[styles.suggestionsContainer, style.suggestionsContainer]}>
           <FlatList
             data={predictions}
             renderItem={renderSuggestion}
@@ -278,7 +279,7 @@ const GooglePlacesTextInput = forwardRef(
             <ActivityIndicator
               style={[
                 styles.loadingIndicator,
-                { [isRTL ? 'left' : 'right']: 15 },
+                isRTL ? styles.leftAligned : styles.rightAligned,
               ]}
               size={'small'}
               color={style.loadingIndicator?.color || '#000000'} // Default color
