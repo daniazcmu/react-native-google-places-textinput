@@ -68,8 +68,11 @@ const App = () => {
           apiKey="YOUR_API_KEY_HERE"
           placeHolderText="Search for a location"
           onPlaceSelect={handleBasicPlaceSelect}
-          minCharsToFetch={2}
+          minCharsToFetch={3}
+          debounceDelay={350}
           languageCode="en"
+          fetchPlaceDetails={true}
+          placeDetailsFields={["location", "formattedAddress"]}
         />
       </View>
 
@@ -80,10 +83,12 @@ const App = () => {
           placeHolderText="Find places nearby"
           onPlaceSelect={handleStyledPlaceSelect}
           style={customStyles}
-          minCharsToFetch={2}
+          minCharsToFetch={3}
+          debounceDelay={350}
           languageCode="en"
-          debounceDelay={300}
           types={['restaurant', 'cafe']}
+          fetchPlaceDetails={true}
+          placeDetailsFields={["location", "formattedAddress"]}
         />
       </View>
     </SafeAreaView>

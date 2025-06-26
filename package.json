@@ -1,6 +1,6 @@
 {
-  "name": "react-native-google-places-textinput",
-  "version": "0.2.1",
+  "name": "@daniazcmu/react-native-google-places-textinput",
+  "version": "1.9.0",
   "description": "A customizable React Native TextInput component for Google Places Autocomplete using the Places API (New)",
   "source": "./src/index.tsx",
   "main": "./lib/commonjs/index.js",
@@ -61,7 +61,7 @@
   },
   "homepage": "https://github.com/amitpdev/react-native-google-places-textinput#readme",
   "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
+    "access": "public"
   },
   "devDependencies": {
     "@commitlint/config-conventional": "^19.6.0",

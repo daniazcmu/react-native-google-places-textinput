@@ -69,6 +69,14 @@ const styles = StyleSheet.create({
   },
 });
 
+// Agrego utilitario para generar UUID v4 sin dependencias externas
+const generateSessionToken = () =>
+  'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+
 const GooglePlacesTextInput = forwardRef(
   (
     {
@@ -83,6 +91,9 @@ const GooglePlacesTextInput = forwardRef(
       onPlaceSelect,
       debounceDelay = 200,
       showLoadingIndicator = true,
+      fetchPlaceDetails = false,
+      placeDetailsFields = ['location'],
+      sessionEnabled = true,
       style = {},
     },
     ref
@@ -93,6 +104,7 @@ const GooglePlacesTextInput = forwardRef(
     const [showSuggestions, setShowSuggestions] = useState(false);
     const debounceTimeout = useRef(null);
     const inputRef = useRef(null);
+    const sessionTokenRef = useRef(sessionEnabled ? generateSessionToken() : null);
 
     useEffect(() => {
       return () => {
@@ -149,6 +161,7 @@ const GooglePlacesTextInput = forwardRef(
               languageCode,
               ...(includedRegionCodes?.length > 0 && { includedRegionCodes }),
               ...(types.length > 0 && { includedPrimaryTypes: types }),
+              ...(sessionEnabled && { sessionToken: sessionTokenRef.current }),
             }),
           }
         );
@@ -169,6 +182,33 @@ const GooglePlacesTextInput = forwardRef(
       }
     };
 
+    // Nueva función para obtener detalles de lugar (lat/lng)
+    const retrievePlaceDetails = async (placeId) => {
+      try {
+        setLoading(true);
+        const fieldsParam = Array.isArray(placeDetailsFields)
+          ? placeDetailsFields.join(',')
+          : placeDetailsFields;
+        const url = `https://places.googleapis.com/v1/places/${placeId}?fields=${fieldsParam}${
+          languageCode ? `&languageCode=${languageCode}` : ''
+        }${sessionEnabled ? `&sessionToken=${sessionTokenRef.current}` : ''}`;
+
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Goog-Api-Key': apiKey,
+          },
+        });
+        return await response.json();
+      } catch (err) {
+        console.error('Error fetching place details:', err);
+        return null;
+      } finally {
+        setLoading(false);
+      }
+    };
+
     const handleTextChange = (text) => {
       setInputText(text);
       onPlaceSelect(null); // Notify parent when text changes
@@ -182,15 +222,32 @@ const GooglePlacesTextInput = forwardRef(
       }, debounceDelay);
     };
 
-    const handleSuggestionPress = (suggestion) => {
+    const handleSuggestionPress = async (suggestion) => {
       const place = suggestion.placePrediction;
       setInputText(place.structuredFormat.mainText.text);
       setShowSuggestions(false);
-      onPlaceSelect(place); // Notify parent with selected place
+      Keyboard.dismiss();
+
+      if (fetchPlaceDetails) {
+        const details = await retrievePlaceDetails(place.placeId);
+        // Mezclamos la información básica con los detalles
+        const combinedPlace = { ...place, details };
+        onPlaceSelect(combinedPlace);
+      } else {
+        onPlaceSelect(place);
+      }
+
+      // La llamada a Place Details termina la sesión; generamos un nuevo token
+      if (sessionEnabled) {
+        sessionTokenRef.current = generateSessionToken();
+      }
     };
 
-    // Show suggestions on focus if text length > 1
+    // Si comenzamos una nueva búsqueda generamos token nuevo
     const handleFocus = () => {
+      if (sessionEnabled && inputText.length === 0) {
+        sessionTokenRef.current = generateSessionToken();
+      }
       if (inputText.length >= minCharsToFetch) {
         fetchPredictions(inputText);
         setShowSuggestions(true);
